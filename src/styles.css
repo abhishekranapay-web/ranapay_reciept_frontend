@@ -1,0 +1,222 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url("https://fonts.gstatic.com/s/plusjakartasans/v8/LDIbaomQNQcsA88c7O9yZ4KMCoOg4IA6-91aHEjcWuA_qU79TIN1.woff2")
+    format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2")
+    format("woff2");
+}
+
+/* ============================================================
+   RanaPay Design System — Premium Fintech / Utility Receipts
+   Palette: deep emerald, ink navy, cream paper, gold accent.
+   All colors are oklch tokens.
+   ============================================================ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+
+  --font-sans: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", "Inter", sans-serif;
+  --font-mono: ui-monospace, "JetBrains Mono", "Fira Code", monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-glow: var(--primary-glow);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-gold: var(--gold);
+  --color-gold-foreground: var(--gold-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --shadow-elegant:
+    0 1px 2px oklch(0.2 0.04 165 / 0.04), 0 8px 24px -8px oklch(0.2 0.04 165 / 0.08);
+  --shadow-glow:
+    0 0 0 1px oklch(0.45 0.13 165 / 0.12), 0 16px 48px -12px oklch(0.45 0.13 165 / 0.25);
+  --gradient-primary: linear-gradient(135deg, oklch(0.42 0.13 165), oklch(0.55 0.14 175));
+  --gradient-surface: linear-gradient(180deg, oklch(0.99 0.005 95), oklch(0.97 0.01 95));
+  --gradient-mesh:
+    radial-gradient(at 20% 0%, oklch(0.95 0.05 165 / 0.5), transparent 50%),
+    radial-gradient(at 80% 100%, oklch(0.93 0.06 90 / 0.4), transparent 50%);
+}
+
+:root {
+  --radius: 0.875rem;
+
+  /* Surfaces — warm paper white */
+  --background: oklch(0.985 0.005 95);
+  --foreground: oklch(0.18 0.02 165);
+  --surface: oklch(1 0 0);
+  --surface-elevated: oklch(0.995 0.003 95);
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.02 165);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.02 165);
+
+  /* Brand — deep emerald with glow */
+  --primary: oklch(0.38 0.11 165);
+  --primary-foreground: oklch(0.98 0.01 95);
+  --primary-glow: oklch(0.55 0.14 175);
+
+  --secondary: oklch(0.96 0.015 165);
+  --secondary-foreground: oklch(0.25 0.05 165);
+
+  --muted: oklch(0.95 0.008 95);
+  --muted-foreground: oklch(0.5 0.02 165);
+
+  --accent: oklch(0.94 0.03 165);
+  --accent-foreground: oklch(0.28 0.08 165);
+
+  --gold: oklch(0.78 0.13 85);
+  --gold-foreground: oklch(0.22 0.04 85);
+
+  --success: oklch(0.55 0.14 155);
+  --success-foreground: oklch(0.99 0.01 155);
+  --warning: oklch(0.72 0.15 70);
+  --warning-foreground: oklch(0.2 0.04 70);
+  --destructive: oklch(0.58 0.22 27);
+  --destructive-foreground: oklch(0.99 0.01 27);
+
+  --border: oklch(0.92 0.008 165);
+  --input: oklch(0.92 0.008 165);
+  --ring: oklch(0.45 0.13 165);
+
+  --chart-1: oklch(0.45 0.13 165);
+  --chart-2: oklch(0.6 0.14 175);
+  --chart-3: oklch(0.78 0.13 85);
+  --chart-4: oklch(0.5 0.18 25);
+  --chart-5: oklch(0.55 0.14 270);
+
+  --sidebar: oklch(0.18 0.025 165);
+  --sidebar-foreground: oklch(0.85 0.01 95);
+  --sidebar-primary: oklch(0.55 0.14 175);
+  --sidebar-primary-foreground: oklch(0.99 0.01 95);
+  --sidebar-accent: oklch(0.24 0.03 165);
+  --sidebar-accent-foreground: oklch(0.95 0.01 95);
+  --sidebar-border: oklch(0.28 0.03 165);
+  --sidebar-ring: oklch(0.55 0.14 175);
+}
+
+.dark {
+  --background: oklch(0.15 0.02 165);
+  --foreground: oklch(0.96 0.01 95);
+  --surface: oklch(0.18 0.025 165);
+  --surface-elevated: oklch(0.22 0.03 165);
+  --card: oklch(0.2 0.025 165);
+  --card-foreground: oklch(0.96 0.01 95);
+  --popover: oklch(0.2 0.025 165);
+  --popover-foreground: oklch(0.96 0.01 95);
+  --primary: oklch(0.65 0.15 170);
+  --primary-foreground: oklch(0.15 0.02 165);
+  --primary-glow: oklch(0.72 0.15 175);
+  --secondary: oklch(0.26 0.03 165);
+  --secondary-foreground: oklch(0.96 0.01 95);
+  --muted: oklch(0.24 0.025 165);
+  --muted-foreground: oklch(0.7 0.02 95);
+  --accent: oklch(0.3 0.04 165);
+  --accent-foreground: oklch(0.96 0.01 95);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.65 0.15 170);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html,
+  body {
+    font-family: var(--font-sans);
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    background-image: var(--gradient-mesh);
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer utilities {
+  .bg-gradient-primary {
+    background-image: var(--gradient-primary);
+  }
+  .bg-gradient-surface {
+    background-image: var(--gradient-surface);
+  }
+  .shadow-elegant {
+    box-shadow: var(--shadow-elegant);
+  }
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .glass {
+    background: color-mix(in oklab, var(--surface) 70%, transparent);
+    backdrop-filter: blur(12px) saturate(1.4);
+    -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  }
+
+  .number-tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
