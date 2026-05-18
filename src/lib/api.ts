@@ -1,6 +1,7 @@
 import type { Receipt } from "@/types/receipt";
+import { getAuthHeaders } from "./auth-api";
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://ranapay-reciept-backend.vercel.app";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://service.pavki.in";
 
 /**
  * Transform Receipt to API format (map field names)
@@ -69,7 +70,9 @@ function fromAPIFormat(data: Record<string, unknown>): Receipt {
  */
 export async function fetchReceiptHistory(limit: number = 10): Promise<Receipt[]> {
   try {
-    const response = await fetch(`${BASE_URL}/api/receipts/history?limit=${limit}`);
+    const response = await fetch(`${BASE_URL}/api/receipts/history?limit=${limit}`, {
+      headers: getAuthHeaders(),
+    });
     if (!response.ok) {
       throw new Error(`Failed to fetch history: ${response.statusText}`);
     }
@@ -91,9 +94,7 @@ export async function createReceipt(receipt: Receipt): Promise<Receipt> {
     const apiPayload = toAPIFormat(receipt);
     const response = await fetch(`${BASE_URL}/api/receipts/create`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify(apiPayload),
     });
     if (!response.ok) {
@@ -113,7 +114,9 @@ export async function createReceipt(receipt: Receipt): Promise<Receipt> {
  */
 export async function fetchReceiptById(id: string): Promise<Receipt> {
   try {
-    const response = await fetch(`${BASE_URL}/api/receipts/${id}`);
+    const response = await fetch(`${BASE_URL}/api/receipts/${id}`, {
+      headers: getAuthHeaders(),
+    });
     if (!response.ok) {
       throw new Error(`Failed to fetch receipt: ${response.statusText}`);
     }
@@ -133,6 +136,9 @@ export async function searchReceipts(searchQuery: string): Promise<Receipt[]> {
   try {
     const response = await fetch(
       `${BASE_URL}/api/receipts/search?search=${encodeURIComponent(searchQuery)}`,
+      {
+        headers: getAuthHeaders(),
+      }
     );
     if (!response.ok) {
       throw new Error(`Failed to search receipts: ${response.statusText}`);

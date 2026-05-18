@@ -7,7 +7,9 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
+import { isAuthenticated } from "@/lib/auth-api";
 
 import appCss from "../styles.css?url";
 
@@ -119,6 +121,22 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+
+  // Client-side auth check and navigation
+  useEffect(() => {
+    const pathname = window.location.pathname;
+    
+    // Allow /auth route
+    if (pathname === "/auth") {
+      return;
+    }
+
+    // Redirect to /auth if not authenticated
+    if (!isAuthenticated()) {
+      router.navigate({ to: "/auth" });
+    }
+  }, [router]);
 
   return (
     <QueryClientProvider client={queryClient}>
