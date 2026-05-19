@@ -32,10 +32,18 @@ export const receiptSchema = z.object({
   area: z.enum(AREAS),
   division: z.string().trim().min(2, "Division is required").max(60),
   agentName: z.string().trim().min(2, "Agent name is required").max(60),
-  agentMobile: z
-    .string()
-    .trim()
-    .regex(/^[6-9]\d{9}$/, "Enter a valid 10-digit Indian mobile number"),
+ agentMobile: z.string().superRefine((val, ctx) => {
+  // EMPTY = ALLOWED
+  if (!val || val.trim() === "") return
+
+  // VALIDATE ONLY IF USER TYPES
+  if (!/^[0-9]{10}$/.test(val)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Enter valid 10 digit mobile number",
+    })
+  }
+}),
   agentId: z.string().trim().min(2, "Agent ID is required").max(20),
   paymentDate: z.string().min(1, "Payment date is required"),
   paymentMode: z.enum(PAYMENT_MODES),

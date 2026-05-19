@@ -52,5 +52,5 @@ export const CONNECTION_TYPES = ["POSTPAID", "PREPAID"] as const;
 export const AREAS = ["RURAL", "URBAN", "IPDS", "RAPDRP"] as const;
 export const PAYMENT_MODES = ["PG", "WALLET"] as const;
 
-export const AGENCY_NAME = "RANAPAY INDIA PRIVATE LIMITED";
+export const AGENCY_NAME = "RANAPAY INDIA PVT LTD";
 export const RANAPAY_LOGO = "/logos/ranapay.png";

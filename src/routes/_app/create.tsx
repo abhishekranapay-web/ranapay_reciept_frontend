@@ -389,15 +389,25 @@ function CreateReceiptPage() {
           <FormSection icon={UserCog} title="Agent Information" delay={0.15}>
             <Field label="Agent Name" error={errors.agentName?.message}>
               <Input
-                onInput={(e) => {
-                  e.currentTarget.value = e.currentTarget.value.replace(/[^A-Za-z\s]/g, "");
-                }}
+                
                 className="h-11"
                 placeholder="Agent full name"
                 {...register("agentName")}
               />
             </Field>
-            <Field label="Agent Mobile" >
+         {/* <Field label="Agent Mobile (Optional)"> */}
+  {/* <Input
+    inputMode="numeric"
+    onInput={(e) => {
+      e.currentTarget.value =
+        e.currentTarget.value.replace(/\D/g, "")
+    }}
+    className="h-11"
+    placeholder="9XXXXXXXXX"
+    maxLength={10}
+    {...register("agentMobile")}
+  /> */}
+  <Field label="Agent Mobile (Optional)" error={errors.agentMobile?.message}>
               <Input
                 inputMode="numeric"
                 onInput={(e) => {
@@ -408,7 +418,7 @@ function CreateReceiptPage() {
                 maxLength={10}
                 {...register("agentMobile")}
               />
-            </Field>
+</Field>
             <Field label="Agent ID" error={errors.agentId?.message}>
               <Input className="h-11" placeholder="AG10001" {...register("agentId")} />
             </Field>
