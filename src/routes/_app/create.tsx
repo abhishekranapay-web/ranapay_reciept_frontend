@@ -94,7 +94,7 @@ function CreateReceiptPage() {
       agentName: "",
       agentMobile: "",
       agentId: "",
-      paymentDate: new Date().toISOString().slice(0, 16),
+     paymentDate: new Date().toLocaleDateString("en-CA"),
       paymentMode: "PG",
     },
   });
@@ -127,7 +127,7 @@ function CreateReceiptPage() {
         transactionStatus: "SUCCESS",
         paymentStatus: "SUCCESS",
         agencyName: AGENCY_NAME,
-        paymentDate: new Date(data.paymentDate).toISOString(),
+        paymentDate: data.paymentDate,
         createdAt: new Date().toISOString(),
         mobileNumber: data.mobileNumber || undefined,
       };

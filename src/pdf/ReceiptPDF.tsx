@@ -246,7 +246,7 @@ export function ReceiptPDF({ receipt }: { receipt: Receipt }) {
 
   const paymentDate = format(
     new Date(receipt.paymentDate),
-    "yyyy-MM-dd HH:mm:ss"
+    "yyyy-MM-dd "
   );
 
   return (
