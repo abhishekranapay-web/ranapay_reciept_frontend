@@ -3,9 +3,10 @@ import { defineConfig } from "vite";
 import tsConfigPaths from "vite-tsconfig-paths";
 import tailwindcss from "tailwindcss";
 import tailwindVite from "@tailwindcss/vite";
+import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 
 export default defineConfig({
-  plugins: [react(), tsConfigPaths(), tailwindVite()],
+  plugins: [TanStackRouterVite(), react(), tsConfigPaths(), tailwindVite()],
   build: {
     target: "ES2020",
     outDir: "dist",

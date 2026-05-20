@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, FilePlus2, History, Zap, Sparkles } from "lucide-react";
+import { LayoutDashboard, FilePlus2, History, Zap, Sparkles, Upload } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { CloudSun, CloudRain, Sun, CloudLightning } from "lucide-react";
@@ -15,6 +15,7 @@ const formattedDate = today.toLocaleDateString("en-IN", {
 const nav = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/create", label: "Create Receipt", icon: FilePlus2 },
+  { to: "/bulk-upload", label: "Bulk Upload", icon: Upload },
   { to: "/history", label: "Receipt History", icon: History },
 ];
 

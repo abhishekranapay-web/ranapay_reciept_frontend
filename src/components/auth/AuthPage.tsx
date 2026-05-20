@@ -157,10 +157,16 @@ export function AuthPage() {
     (HTMLInputElement | null)[]
   >([]);
 
+const otpRequested = useRef(false);
+
   // REQUEST OTP
-  useEffect(() => {
-    handleRequestOtp();
-  }, []);
+ useEffect(() => {
+  if (otpRequested.current) return;
+
+  otpRequested.current = true;
+
+  handleRequestOtp();
+}, []);
 
   const handleRequestOtp = async () => {
     try {

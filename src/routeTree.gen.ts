@@ -15,6 +15,7 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppHistoryRouteImport } from './routes/_app/history'
 import { Route as AppCreateRouteImport } from './routes/_app/create'
+import { Route as AppBulkUploadRouteImport } from './routes/_app/bulk-upload'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -45,17 +46,24 @@ const AppCreateRoute = AppCreateRouteImport.update({
   path: '/create',
   getParentRoute: () => AppRoute,
 } as any)
+const AppBulkUploadRoute = AppBulkUploadRouteImport.update({
+  id: '/bulk-upload',
+  path: '/bulk-upload',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/auth': typeof AuthRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/bulk-upload': typeof AppBulkUploadRoute
   '/create': typeof AppCreateRoute
   '/history': typeof AppHistoryRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/bulk-upload': typeof AppBulkUploadRoute
   '/create': typeof AppCreateRoute
   '/history': typeof AppHistoryRoute
   '/': typeof AppIndexRoute
@@ -65,20 +73,28 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/_app/bulk-upload': typeof AppBulkUploadRoute
   '/_app/create': typeof AppCreateRoute
   '/_app/history': typeof AppHistoryRoute
   '/_app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/sitemap.xml' | '/create' | '/history'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/sitemap.xml'
+    | '/bulk-upload'
+    | '/create'
+    | '/history'
   fileRoutesByTo: FileRoutesByTo
-  to: '/auth' | '/sitemap.xml' | '/create' | '/history' | '/'
+  to: '/auth' | '/sitemap.xml' | '/bulk-upload' | '/create' | '/history' | '/'
   id:
     | '__root__'
     | '/_app'
     | '/auth'
     | '/sitemap.xml'
+    | '/_app/bulk-upload'
     | '/_app/create'
     | '/_app/history'
     | '/_app/'
@@ -134,16 +150,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCreateRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/bulk-upload': {
+      id: '/_app/bulk-upload'
+      path: '/bulk-upload'
+      fullPath: '/bulk-upload'
+      preLoaderRoute: typeof AppBulkUploadRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
+  AppBulkUploadRoute: typeof AppBulkUploadRoute
   AppCreateRoute: typeof AppCreateRoute
   AppHistoryRoute: typeof AppHistoryRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppBulkUploadRoute: AppBulkUploadRoute,
   AppCreateRoute: AppCreateRoute,
   AppHistoryRoute: AppHistoryRoute,
   AppIndexRoute: AppIndexRoute,
@@ -159,13 +184,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

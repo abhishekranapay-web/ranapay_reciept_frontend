@@ -151,3 +151,32 @@ export async function searchReceipts(searchQuery: string): Promise<Receipt[]> {
     throw error;
   }
 }
+
+/**
+ * Bulk upload receipts
+ */
+export async function bulkUploadReceipts(
+  receipts: Receipt[]
+): Promise<{ receipts: Receipt[]; errors: string[] }> {
+  try {
+    const payload = receipts.map((r) => toAPIFormat(r));
+    const response = await fetch(`${BASE_URL}/api/receipts/bulk-upload`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ receipts: payload }),
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to bulk upload receipts: ${response.statusText}`);
+    }
+    const data = await response.json();
+    const createdReceipts = Array.isArray(data) ? data : data.data || data.receipts || [];
+    const errors = data.errors || [];
+    return {
+      receipts: createdReceipts.map((r: Record<string, unknown>) => fromAPIFormat(r)),
+      errors,
+    };
+  } catch (error) {
+    console.error("Error bulk uploading receipts:", error);
+    throw error;
+  }
+}

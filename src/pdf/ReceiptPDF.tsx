@@ -428,3 +428,7 @@ export async function downloadReceiptPDF(receipt: Receipt) {
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+
+export async function generateReceiptPDF(receipt: Receipt): Promise<Blob> {
+  return pdf(<ReceiptPDF receipt={receipt} />).toBlob();
+}
