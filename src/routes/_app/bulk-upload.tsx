@@ -68,6 +68,7 @@ function BulkUploadPage() {
   const [receiptPDFs, setReceiptPDFs] = useState<Map<string, Blob>>(new Map());
   const [isProcessing, setIsProcessing] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  
 
  const handleFileSelect = async (
   event: React.ChangeEvent<HTMLInputElement>
@@ -136,9 +137,9 @@ function BulkUploadPage() {
         apiData.errors.forEach((err: any) => {
           errors.push({
             rowIndex:
-              err.rowIndex !== undefined
-                ? err.rowIndex
-                : err.row || 0,
+  err.row !== undefined
+    ? err.row - 1
+    : err.rowIndex || 0,
 
             field:
               err.field ||
@@ -200,6 +201,14 @@ function BulkUploadPage() {
     }
   }
 };
+const [failedReceipts, setFailedReceipts] = useState<
+  {
+    rowIndex: number;
+    customerName: string;
+    error: string;
+  }[]
+>([]);
+
 
   const handleDownloadSample = (format: "xlsx" | "csv") => {
     const blob = generateSampleFile(format);
@@ -208,80 +217,192 @@ function BulkUploadPage() {
     toast.success(`Sample ${format.toUpperCase()} file downloaded`);
   };
 
-  const handleGenerateReceipts = async () => {
-    if (uploadedData.length === 0) {
-      toast.error("No data to process");
-      return;
-    }
 
-    if (apiErrors.length > 0) {
-      toast.error("Please fix all API validation errors before generating receipts");
-      return;
-    }
 
-    setIsGenerating(true);
+const handleGenerateReceipts = async () => {
+  if (uploadedData.length === 0) {
+    toast.error("No data to process");
+    return;
+  }
 
-    try {
-      const receiptsToGenerate: GeneratedReceipt[] = [];
-      const pdfMap = new Map<string, Blob>();
+  setIsGenerating(true);
 
-      for (let i = 0; i < uploadedData.length; i++) {
-        const row = uploadedData[i];
+  try {
+    const receiptsToGenerate: GeneratedReceipt[] = [];
+
+    const failedRows: {
+      rowIndex: number;
+      customerName: string;
+      error: string;
+    }[] = [];
+
+    const pdfMap = new Map<string, Blob>();
+
+    for (let i = 0; i < uploadedData.length; i++) {
+
+      const row = uploadedData[i];
+
+      // ❌ FIND API ERROR FOR THIS ROW
+      const rowErrors = apiErrors.filter(
+        (e) => e.rowIndex === i
+      );
+
+      // ❌ FAILED ROW
+      if (rowErrors.length > 0) {
+
+        failedRows.push({
+          rowIndex: i,
+          customerName: String(
+            row.customerName || "-"
+          ),
+          error: rowErrors
+            .map(
+              (e) =>
+                `${e.field || "Field"}: ${e.error}`
+            )
+            .join(", "),
+        });
+
+        continue;
+      }
+
+      try {
+
         const receiptNo = generateReceiptNo();
 
         const receipt: GeneratedReceipt = {
           receiptNo,
           txnId: String(row.txnId),
-          agencyTxnId: String(row.agencyTransactionId),
+          agencyTxnId: String(
+            row.agencyTransactionId
+          ),
           billNumber: "",
-          customerName: String(row.customerName),
-          accountNumber: String(row.accountNumber),
-          totalPayable: Number(row.totalPayableAmount),
-          mobileNumber: String(row.mobileNumber || ""),
-          amountPaid: Number(row.amountPaid),
-          amountInWords: String(row.amountPaidWords),
-          connectionType: String(row.connectionType) as Receipt["connectionType"],
-          discom: String(row.discom) as Receipt["discom"],
-          area: String(row.area) as "RURAL" | "URBAN",
-          division: String(row.division),
-          agentName: String(row.agentName),
-          agentMobile: String(row.agentMobile),
-          agentId: String(row.agentId),
-          transactionStatus: "SUCCESS" as const,
-          paymentDate: String(row.paymentDate),
-          paymentMode: String(row.paymentMode) as "PG" | "WALLET",
-          agencyName: String(row.agencyName),
-          paymentStatus: "SUCCESS" as const,
-          createdAt: new Date().toISOString(),
+          customerName: String(
+            row.customerName
+          ),
+          accountNumber: String(
+            row.accountNumber
+          ),
+          totalPayable: Number(
+            row.totalPayableAmount
+          ),
+          mobileNumber: String(
+            row.mobileNumber || ""
+          ),
+          amountPaid: Number(
+            row.amountPaid
+          ),
+          amountInWords: String(
+            row.amountPaidWords
+          ),
+          connectionType: String(
+            row.connectionType
+          ) as Receipt["connectionType"],
+
+          discom: String(
+            row.discom
+          ) as Receipt["discom"],
+
+          area: String(
+            row.area
+          ) as "RURAL" | "URBAN",
+
+          division: String(
+            row.division
+          ),
+
+          agentName: String(
+            row.agentName
+          ),
+
+          agentMobile: String(
+            row.agentMobile
+          ),
+
+          agentId: String(
+            row.agentId
+          ),
+
+          transactionStatus: "SUCCESS",
+
+          paymentDate: String(
+            row.paymentDate
+          ),
+
+          paymentMode: String(
+            row.paymentMode
+          ) as "PG" | "WALLET",
+
+          agencyName: String(
+            row.agencyName
+          ),
+
+          paymentStatus: "SUCCESS",
+
+          createdAt:
+            new Date().toISOString(),
+
           rowIndex: i,
         };
 
         receiptsToGenerate.push(receipt);
 
-        // Generate PDF for each receipt
-        try {
-          const mod = await import("@/pdf/ReceiptPDF");
-          const pdf = await mod.generateReceiptPDF(receipt);
-          pdfMap.set(receipt.receiptNo, pdf);
-        } catch (err) {
-          console.error(`Failed to generate PDF for receipt ${receipt.receiptNo}:`, err);
-        }
+        // PDF
+        const mod = await import(
+          "@/pdf/ReceiptPDF"
+        );
+
+        const pdf =
+          await mod.generateReceiptPDF(
+            receipt
+          );
+
+        pdfMap.set(
+          receipt.receiptNo,
+          pdf
+        );
 
         addReceipt(receipt);
-      }
 
-      // Data was already validated by API during upload, so just show success
-      setGeneratedReceipts(receiptsToGenerate);
-      setReceiptPDFs(pdfMap);
-      toast.success(`Successfully generated ${receiptsToGenerate.length} receipts. Ready to download.`);
-    } catch (err) {
-      toast.error(
-        `Failed to generate receipts: ${err instanceof Error ? err.message : "Unknown error"}`
-      );
-    } finally {
-      setIsGenerating(false);
+      } catch (err) {
+
+        failedRows.push({
+          rowIndex: i,
+          customerName: String(
+            row.customerName || "-"
+          ),
+          error:
+            err instanceof Error
+              ? err.message
+              : "Receipt generation failed",
+        });
+      }
     }
-  };
+
+    setGeneratedReceipts(
+      receiptsToGenerate
+    );
+
+    setFailedReceipts(failedRows);
+
+    setReceiptPDFs(pdfMap);
+
+    toast.success(
+      `${receiptsToGenerate.length} receipts generated`
+    );
+
+  } catch (err) {
+
+    toast.error(
+      `Failed to generate receipts`
+    );
+
+  } finally {
+
+    setIsGenerating(false);
+  }
+};
+
 
   const handleDownloadReceipt = (receipt: GeneratedReceipt) => {
     const pdfBlob = receiptPDFs.get(receipt.receiptNo);
@@ -416,7 +537,7 @@ function BulkUploadPage() {
       )}
 
       {/* Uploaded Data Summary */}
-      {uploadedData.length > 0 && apiErrors.length === 0 && (
+{uploadedData.length > 0 && (
         <Card className="p-6">
           <div className="flex items-center justify-between">
             <div>
@@ -503,10 +624,138 @@ function BulkUploadPage() {
                       </TableCell>
                     </TableRow>
                   ))}
+{/* 
+                  {failedReceipts.length > 0 && (
+  <Card className="p-6 border-red-200">
+    <div className="mb-4">
+      <h2 className="text-2xl font-bold text-red-600">
+        Failed Receipts
+      </h2>
+
+      <p className="text-sm text-muted-foreground">
+        These rows failed validation or generation
+      </p>
+    </div>
+
+    <div className="overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Row</TableHead>
+            <TableHead>Customer</TableHead>
+            <TableHead>Error</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead className="text-right">
+              Action
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+
+        <TableBody>
+          {failedReceipts.map((item) => (
+            <TableRow key={item.rowIndex}>
+              <TableCell>
+                {item.rowIndex + 2}
+              </TableCell>
+
+              <TableCell>
+                {item.customerName}
+              </TableCell>
+
+              <TableCell className="text-red-600">
+                {item.error}
+              </TableCell>
+
+              <TableCell>
+                <Badge variant="destructive">
+                  Failed
+                </Badge>
+              </TableCell>
+
+              <TableCell className="text-right">
+                <Button
+                  disabled
+                  variant="ghost"
+                  size="sm"
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  </Card>
+)} */}
                 </TableBody>
               </Table>
             </div>
           </Card>
+          {/* Failed Receipts */}
+{failedReceipts.length > 0 && (
+  <Card className="p-6 border-red-200">
+    <div className="mb-4">
+      <h2 className="text-2xl font-bold text-red-600">
+        Failed Receipts
+      </h2>
+
+      <p className="text-sm text-muted-foreground">
+        These rows failed validation or generation
+      </p>
+    </div>
+
+    <div className="overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Row</TableHead>
+            <TableHead>Customer</TableHead>
+            <TableHead>Error</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead className="text-right">
+              Action
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+
+        <TableBody>
+          {failedReceipts.map((item) => (
+            <TableRow key={item.rowIndex}>
+              <TableCell>
+                {item.rowIndex + 2}
+              </TableCell>
+
+              <TableCell>
+                {item.customerName}
+              </TableCell>
+
+              <TableCell className="text-red-600 max-w-[300px] break-words">
+                {item.error}
+              </TableCell>
+
+              <TableCell>
+                <Badge variant="destructive">
+                  Failed
+                </Badge>
+              </TableCell>
+
+              <TableCell className="text-right">
+                <Button
+                  disabled
+                  variant="ghost"
+                  size="sm"
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  </Card>
+)}
         </div>
       )}
     </div>

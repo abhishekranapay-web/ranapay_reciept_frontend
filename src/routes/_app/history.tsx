@@ -63,7 +63,7 @@ function HistoryPage() {
     const loadReceipts = async () => {
       setLoading(true);
       try {
-        const data = await fetchReceiptHistory(100);
+        const data = await fetchReceiptHistory(1000);
         setReceipts(data);
       } catch (error) {
         console.error("Failed to load receipts:", error);
@@ -89,7 +89,7 @@ function HistoryPage() {
       setSearching(true);
       setLoading(true);
       try {
-        fetchReceiptHistory(100)
+        fetchReceiptHistory(1000)
           .then((data) => {
             setReceipts(data);
           })
@@ -273,7 +273,8 @@ function HistoryPage() {
                           <div>
                             <div className="font-semibold text-foreground">{r.customerName}</div>
                             <div className="text-[11px] text-muted-foreground">
-                              {DISCOMS[r.discom].key} · {r.connectionType}
+                              {/* {DISCOMS[r.discom].key} · {r.connectionType} */}
+                              {DISCOMS[r.discom]?.key || r.discom || "Unknown"} · {r.connectionType}
                             </div>
                           </div>
                         </div>
@@ -285,10 +286,16 @@ function HistoryPage() {
                         {r.txnId}
                       </td>
                       <td className="px-5 py-4 text-[12px] text-muted-foreground">
-                        {format(new Date(r.paymentDate), "dd MMM yyyy")}
-                        <div className="text-[10.5px]">
-                          {format(new Date(r.paymentDate), "HH:mm")}
-                        </div>
+                        {/* {format(new Date(r.paymentDate), "dd MMM yyyy")} */}
+                        {r.paymentDate &&
+                          !isNaN(new Date(r.paymentDate).getTime())
+                          ? format(new Date(r.paymentDate), "dd MMM yyyy")
+                          : "-"}
+                        {/* <div className="text-[10.5px]">
+{r.paymentDate &&
+!isNaN(new Date(r.paymentDate).getTime())
+  ? format(new Date(r.paymentDate), "HH:mm")
+  : "-"}                        </div> */}
                       </td>
                       <td className="px-5 py-4">
                         <StatusBadge status={r.paymentStatus} />
@@ -363,7 +370,8 @@ function HistoryPage() {
                 <DetailGroup
                   title="DISCOM"
                   rows={[
-                    ["Provider", DISCOMS[active.discom].name],
+                    // ["Provider", DISCOMS[active.discom].name],
+                    ["Provider", DISCOMS[active.discom]?.name || active.discom || "Unknown"],
                     ["Division", active.division],
                     ["Bill No", active.billNumber],
                   ]}
