@@ -278,7 +278,6 @@ export function generateSampleFile(format: "xlsx" | "csv"): Blob {
       totalPayableAmount: 5000,
       mobileNumber: "9876543210",
       amountPaid: 5000,
-      amountPaidWords: "FIVE THOUSAND RUPEES ONLY",
       connectionType: "POSTPAID",
       discom: "DVVNL",
       area: "URBAN",
