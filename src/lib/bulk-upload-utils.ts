@@ -272,6 +272,7 @@ export function generateSampleFile(format: "xlsx" | "csv"): Blob {
     {
       txnId: "TXN001",
       agencyTransactionId: "AGY001",
+      billNumber: "89898891",
       customerName: "John Doe",
       accountNumber: "1234567890",
       totalPayableAmount: 5000,
