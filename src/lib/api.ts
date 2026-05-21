@@ -37,7 +37,7 @@ function toAPIFormat(receipt: Receipt): Record<string, unknown> {
 /**
  * Transform API response to Receipt format (reverse field mapping)
  */
-function fromAPIFormat(data: Record<string, unknown>): Receipt {
+export function fromAPIFormat(data: Record<string, unknown>): Receipt {
   return {
     receiptNo: String(data.receiptNumber || data.receiptNo || ""),
     txnId: String(data.transactionId || data.txnId || ""),

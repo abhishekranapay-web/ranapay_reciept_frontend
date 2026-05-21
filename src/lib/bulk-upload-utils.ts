@@ -59,6 +59,68 @@ export function validateColumns(headers: string[]): { valid: boolean; missingCol
   };
 }
 
+function excelSerialToISOString(value: number): string | null {
+  if (typeof value !== "number" || value <= 0) return null;
+  // Excel serial date to JS date. Excel serial 1 = 1900-01-01, so subtract 25569 days
+  const msPerDay = 86400 * 1000;
+  const date = new Date(Math.round((value - 25569) * msPerDay));
+  if (isNaN(date.getTime())) return null;
+  return date.toISOString().split("T")[0];
+}
+
+function normalizePaymentDate(value: unknown): string {
+  if (typeof value === "number") {
+    const iso = excelSerialToISOString(value);
+    if (iso) return iso;
+    return String(value);
+  }
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) return "";
+    if (/^\d+$/.test(trimmed)) {
+      const numeric = Number(trimmed);
+      const iso = excelSerialToISOString(numeric);
+      if (iso) return iso;
+    }
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+      return trimmed;
+    }
+    const parsed = new Date(trimmed);
+    if (!isNaN(parsed.getTime())) {
+      return parsed.toISOString().split("T")[0];
+    }
+    return trimmed;
+  }
+
+  return "";
+}
+
+function normalizeRow(row: Record<string, unknown>): BulkUploadRow {
+  return {
+    txnId: String(row.txnId ?? ""),
+    agencyTransactionId: String(row.agencyTransactionId ?? ""),
+    customerName: String(row.customerName ?? ""),
+    accountNumber: String(row.accountNumber ?? ""),
+    totalPayableAmount: (row.totalPayableAmount as string | number) ?? "",
+    mobileNumber: String(row.mobileNumber ?? ""),
+    amountPaid: (row.amountPaid as string | number) ?? "",
+    amountPaidWords: String(row.amountPaidWords ?? ""),
+    connectionType: String(row.connectionType ?? ""),
+    discom: String(row.discom ?? ""),
+    area: String(row.area ?? ""),
+    division: String(row.division ?? ""),
+    agentName: String(row.agentName ?? ""),
+    agentMobile: String(row.agentMobile ?? ""),
+    agentId: String(row.agentId ?? ""),
+    transactionStatus: String(row.transactionStatus ?? ""),
+    paymentDate: normalizePaymentDate(row.paymentDate),
+    paymentMode: String(row.paymentMode ?? ""),
+    agencyName: String(row.agencyName ?? ""),
+    paymentStatus: String(row.paymentStatus ?? ""),
+  };
+}
+
 export function validateRow(row: BulkUploadRow, rowIndex: number): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
 
@@ -150,8 +212,9 @@ async function parseExcelFile(file: File): Promise<{
     }
 
     const headers = Object.keys(jsonData[0] as Record<string, unknown>);
+    const data = (jsonData as Record<string, unknown>[]).map((row) => normalizeRow(row));
     return {
-      data: jsonData as BulkUploadRow[],
+      data,
       headers,
     };
   } catch (err) {
@@ -187,12 +250,13 @@ async function parseCSVFile(file: File): Promise<{
         }
 
         const headers = results.meta.fields || [];
+        const data = (results.data as Record<string, unknown>[]).map((row) => normalizeRow(row));
         resolve({
-          data: results.data as BulkUploadRow[],
+          data,
           headers,
         });
       },
-      error(error: Papa.ParseError) {
+      error(error: any) {
         resolve({
           data: [],
           headers: [],

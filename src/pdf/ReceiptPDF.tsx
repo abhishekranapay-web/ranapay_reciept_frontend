@@ -9,18 +9,8 @@ import {
 } from "@react-pdf/renderer";
 import type { Receipt } from "@/types/receipt";
 import { DISCOMS, RANAPAY_LOGO } from "@/constants/discoms";
-import { format } from "date-fns";
+import { safeFormatDate } from "@/lib/utils";
 
-/* =========================================================
-   PIXEL-PERFECT PAYMENT RECEIPT PDF
-   Matches screenshot exactly:
-   - Header: DISCOM logo left | Company name+address center | RanaPay logo right
-   - Bold "PAYMENT RECEIPT" title centered
-   - Bordered receipt box with watermark (RanaPay logo, opacity 0.06, 220x220)
-   - 2-column label-value rows, label left-aligned bold, value bold
-   - Notes section with Times-Bold, numbered list
-   - Correct font sizes, padding, margin
-========================================================= */
 
 const FONT = {
   regular: "Times-Roman",
@@ -244,16 +234,13 @@ export function ReceiptPDF({ receipt }: { receipt: Receipt }) {
   const origin =
     typeof window !== "undefined" ? window.location.origin : "";
 
-  const paymentDate = format(
-    new Date(receipt.paymentDate),
-    "yyyy-MM-dd "
-  );
+  const paymentDate = safeFormatDate(receipt.paymentDate, "yyyy-MM-dd");
 
   return (
-    <Document
-      title={`Receipt ${receipt.receiptNo}`}
-      author="RanaPay India Private Limited"
-    >
+  <Document
+  title={`${receipt.receiptNo}_${receipt.accountNumber}`}
+  author="RanaPay India Private Limited"
+>
       <Page size="A4" style={styles.page}>
 
         {/* ═══════════ HEADER ═══════════ */}
@@ -422,7 +409,7 @@ export async function downloadReceiptPDF(receipt: Receipt) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `Receipt_${receipt.receiptNo}.pdf`;
+a.download = `${receipt.receiptNo}_${receipt.accountNumber}.pdf`;
   document.body.appendChild(a);
   a.click();
   a.remove();

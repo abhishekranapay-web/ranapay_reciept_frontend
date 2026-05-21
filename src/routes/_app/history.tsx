@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { format } from "date-fns";
+import { safeFormatDate } from "@/lib/utils";
 import { Download, Eye, Search, X, Inbox, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -286,16 +286,8 @@ function HistoryPage() {
                         {r.txnId}
                       </td>
                       <td className="px-5 py-4 text-[12px] text-muted-foreground">
-                        {/* {format(new Date(r.paymentDate), "dd MMM yyyy")} */}
-                        {r.paymentDate &&
-                          !isNaN(new Date(r.paymentDate).getTime())
-                          ? format(new Date(r.paymentDate), "dd MMM yyyy")
-                          : "-"}
-                        {/* <div className="text-[10.5px]">
-{r.paymentDate &&
-!isNaN(new Date(r.paymentDate).getTime())
-  ? format(new Date(r.paymentDate), "HH:mm")
-  : "-"}                        </div> */}
+    
+                        {safeFormatDate(r.paymentDate, "yyyy-MM-dd")}
                       </td>
                       <td className="px-5 py-4">
                         <StatusBadge status={r.paymentStatus} />
@@ -340,10 +332,10 @@ function HistoryPage() {
         <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
           {active && (
             <>
-              <SheetHeader>
+                <SheetHeader>
                 <SheetTitle className="font-mono text-base">{active.receiptNo}</SheetTitle>
                 <SheetDescription>
-                  Issued {format(new Date(active.paymentDate), "dd MMM yyyy, hh:mm a")}
+                  Issued {safeFormatDate(active.paymentDate, "yyyy-MM-dd")}
                 </SheetDescription>
               </SheetHeader>
               <div className="mt-6 space-y-5">

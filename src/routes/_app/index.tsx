@@ -14,7 +14,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useReceiptStore } from "@/store/receipts";
 import { formatINR } from "@/lib/receipt-utils";
-import { format } from "date-fns";
+import { safeFormatDate } from "@/lib/utils";
 import { StatusBadge } from "@/components/receipts/StatusBadge";
 import { DISCOMS } from "@/constants/discoms";
 
@@ -177,7 +177,7 @@ function DashboardPage() {
               <div className="hidden text-right md:block">
                 <div className="text-xs font-medium text-foreground">{r.discom}</div>
                 <div className="text-[11px] text-muted-foreground">
-                  {format(new Date(r.paymentDate), "dd MMM yyyy, HH:mm")}
+                  {safeFormatDate(r.paymentDate, "yyyy-MM-dd")}
                 </div>
               </div>
               <div className="text-right">
