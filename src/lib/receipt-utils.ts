@@ -4,10 +4,19 @@ import { format } from "date-fns";
  * Generate a unique receipt number prefixed with RPA followed by
  * YYYYMMDD + 8-digit random suffix. Example: RPA20260304124598.
  */
+// export function generateReceiptNo(): string {
+//   const datePart = format(new Date(), "yyyyMMdd");
+//   const rand = Math.floor(10000000 + Math.random() * 90000000);
+//   return `RPA${datePart}${rand.toString().slice(0, 8)}`.slice(0, 17);
+// }
+
 export function generateReceiptNo(): string {
-  const datePart = format(new Date(), "yyyyMMdd");
-  const rand = Math.floor(10000000 + Math.random() * 90000000);
-  return `RPA${datePart}${rand.toString().slice(0, 8)}`.slice(0, 17);
+  const digits = Array.from(
+    { length: 14 },
+    () => Math.floor(Math.random() * 10)
+  ).join("");
+
+  return `RPA${digits}`;
 }
 
 const ones = [
