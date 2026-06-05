@@ -238,7 +238,7 @@ export function ReceiptPDF({ receipt }: { receipt: Receipt }) {
 
   return (
   <Document
-  title={`${receipt.receiptNo}_${receipt.accountNumber}`}
+  title={`${receipt.paymentDate}_${receipt.accountNumber}`}
   author="RanaPay India Private Limited"
 >
       <Page size="A4" style={styles.page}>
@@ -409,7 +409,7 @@ export async function downloadReceiptPDF(receipt: Receipt) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-a.download = `${receipt.receiptNo}_${receipt.accountNumber}.pdf`;
+a.download = `${receipt.paymentDate}_${receipt.accountNumber}.pdf`;
   document.body.appendChild(a);
   a.click();
   a.remove();
