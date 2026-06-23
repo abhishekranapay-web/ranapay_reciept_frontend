@@ -56,7 +56,26 @@ function HistoryPage() {
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [searching, setSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState<Receipt[] | null>(null);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const cardRef = useRef<HTMLDivElement>(null);
+  const wasSearchingRef = useRef(false);
+
+  // Scroll to search card when search begins
+  useEffect(() => {
+    const isSearching = q.trim().length > 0;
+    if (isSearching && !wasSearchingRef.current && cardRef.current) {
+      const headerOffset = 80;
+      const elementPosition = cardRef.current.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      });
+    }
+    wasSearchingRef.current = isSearching;
+  }, [q]);
 
   // Load receipts on mount
   useEffect(() => {
@@ -79,41 +98,24 @@ function HistoryPage() {
   const handleSearch = (searchTerm: string) => {
     setQ(searchTerm);
 
+    // Reset search results to null to instantly query the full local cache
+    setSearchResults(null);
+
     // Clear existing timeout
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }
 
     if (!searchTerm.trim()) {
-      // If search is cleared, reload all receipts immediately
-      setSearching(true);
-      setLoading(true);
-      try {
-        fetchReceiptHistory(1000)
-          .then((data) => {
-            setReceipts(data);
-          })
-          .catch((error) => {
-            console.error("Failed to load receipts:", error);
-            toast.error("Failed to load receipts");
-          })
-          .finally(() => {
-            setLoading(false);
-            setSearching(false);
-          });
-      } catch (error) {
-        setLoading(false);
-        setSearching(false);
-      }
       return;
     }
 
-    // Debounce API search (300ms delay)
+    // Debounce API search (150ms delay)
     searchTimeoutRef.current = setTimeout(() => {
       setSearching(true);
       searchReceipts(searchTerm)
         .then((results) => {
-          setReceipts(results);
+          setSearchResults(results);
         })
         .catch((error) => {
           console.error("Search failed:", error);
@@ -124,22 +126,24 @@ function HistoryPage() {
         .finally(() => {
           setSearching(false);
         });
-    }, 300);
+    }, 150);
   };
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
-    return receipts.filter((r) => {
+    const sourceList = searchResults !== null ? searchResults : receipts;
+    return sourceList.filter((r) => {
       if (discom !== "ALL" && r.discom !== discom) return false;
       if (!term) return true;
       return (
         r.receiptNo.toLowerCase().includes(term) ||
         r.txnId.toLowerCase().includes(term) ||
         r.customerName.toLowerCase().includes(term) ||
+        r.accountNumber.toLowerCase().includes(term) ||
         (r.mobileNumber || "").includes(term)
       );
     });
-  }, [receipts, q, discom]);
+  }, [receipts, searchResults, q, discom]);
 
   const onDownload = async (r: Receipt) => {
     setDownloadingId(r.receiptNo);
@@ -176,11 +180,11 @@ function HistoryPage() {
           Receipt history
         </h2>
         <p className="text-sm text-muted-foreground">
-          Search by receipt no, transaction ID, customer name or mobile number.
+          Search by receipt no, transaction ID, customer name, account number or mobile number.
         </p>
       </motion.div>
 
-      <Card className="overflow-hidden border-border/60 p-0 shadow-elegant">
+      <Card ref={cardRef} className="overflow-hidden border-border/60 p-0 shadow-elegant">
         <div className="flex flex-col gap-3 border-b border-border/60 bg-gradient-surface p-4 md:flex-row md:items-center">
           <div className="relative flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -189,7 +193,7 @@ function HistoryPage() {
               onChange={(e) => handleSearch(e.target.value)}
               placeholder="Search receipts…"
               className="h-11 pl-10 pr-10"
-              disabled={loading || searching}
+              disabled={loading}
             />
             {(q || searching) && (
               <button
@@ -205,7 +209,7 @@ function HistoryPage() {
             )}
           </div>
           <Select value={discom} onValueChange={setDiscom}>
-            <SelectTrigger className="h-11 md:w-56" disabled={loading || searching}>
+            <SelectTrigger className="h-11 md:w-56" disabled={loading}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

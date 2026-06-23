@@ -6,6 +6,9 @@ import tailwindVite from "@tailwindcss/vite";
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 
 export default defineConfig({
+  server: {
+    port: 8080,
+  },
   plugins: [TanStackRouterVite(), react(), tsConfigPaths(), tailwindVite()],
   build: {
     target: "ES2020",
